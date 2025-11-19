@@ -6,6 +6,14 @@ import os
 import sys
 from pathlib import Path
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(script_dir)
+train_dir = os.path.join(project_root, "train")
+
+# Aggiungi al path
+if train_dir not in sys.path:
+    sys.path.insert(0, train_dir)
+
 # Import delle funzioni dal train.py
 try:
     from train import main as train_main, MODEL_CONFIGS
@@ -80,6 +88,9 @@ class TrainingGUI:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(script_dir)  # sali di una cartella
         common_dir = os.path.join(project_root, "common")
+
+        # ✅ Crea la cartella common se non esiste (silenzioso)
+        os.makedirs(common_dir, exist_ok=True)
 
         self.config_file = os.path.join(common_dir, "training_config.json")
         self.load_config()
