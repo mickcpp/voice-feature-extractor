@@ -18,6 +18,16 @@ except Exception:
     from ..feature_extractors.csv_extract_eGeMAPS_FUNCTION import extract_egemaps_features, egemaps_features_v2
     from ..feature_extractors.extract_features_custom import extract_custom_features
 
+try:
+    from excel_script.excel_converter import convert_single_csv_to_excel
+except Exception:
+    from ..excel_script.excel_converter import convert_single_csv_to_excel
+    # Fallback se il modulo non è trovato
+    def convert_single_csv_to_excel(csv_path):
+        print(f"Warning: csv_to_excel_converter not found, skipping Excel conversion")
+        return None
+
+
 
 def download_opensmile(self):
     """Download and install openSMILE automatically"""
@@ -174,9 +184,9 @@ class AudioFeatureExtractorGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Audio Feature Extractor")
-        self.root.geometry("800x650")
+        self.root.geometry("900x750")
         self.root.resizable(True, True)
-        self.root.minsize(700, 550)
+        self.root.minsize(700, 750)
         
         # Modern color scheme
         self.colors = {
@@ -211,6 +221,8 @@ class AudioFeatureExtractorGUI:
         self.input_type = tk.StringVar(value="file")
         self.extract_egemaps = tk.BooleanVar(value=False)
         self.extract_custom = tk.BooleanVar(value=False)
+        self.convert_to_excel = tk.BooleanVar(value=False)  
+
         
         # AGGIUNTO: Traccia le feature selezionate
         self.selected_egemaps_features = []
@@ -591,6 +603,32 @@ class AudioFeatureExtractorGUI:
             activeforeground=self.colors['white']
         )
         config_btn_custom.pack(side='right', padx=(0, 5))
+
+        # Excel conversion checkbox
+        cb_excel_frame = tk.Frame(features_inner, bg=self.colors['white'])
+        cb_excel_frame.pack(fill='x', pady=8)
+
+        cb_excel = tk.Checkbutton(
+            cb_excel_frame,
+            text="📊 Convert to Excel",
+            variable=self.convert_to_excel,
+            bg=self.colors['white'],
+            fg=self.colors['dark'],
+            font=('Segoe UI', 11, 'bold'),
+            selectcolor=self.colors['light'],
+            activebackground=self.colors['white'],
+            cursor='hand2'
+        )
+        cb_excel.pack(side='left')
+
+        desc_excel = tk.Label(
+            cb_excel_frame,
+            text="Also generate .xlsx files from extracted CSV features",
+            bg=self.colors['white'],
+            fg='#7f8c8d',
+            font=('Segoe UI', 9)
+        )
+        desc_excel.pack(side='left', padx=(10, 0))
 
         # Action area
         action_frame = tk.Frame(main_container, bg=self.colors['bg'])
@@ -1180,6 +1218,16 @@ class AudioFeatureExtractorGUI:
                 extract_egemaps_features(path, out_egemaps, selected_features=features_to_extract)
                 self.set_status("eGeMAPS extraction completed successfully", "success")
 
+                # NUOVO: Conversione Excel
+                if self.convert_to_excel.get():
+                    self.set_status("Converting eGeMAPS CSV to Excel...", "progress")
+                    try:
+                        excel_path = convert_single_csv_to_excel(out_egemaps)
+                        if excel_path:
+                            self.set_status(f"Excel created: {os.path.basename(excel_path)}", "success")
+                    except Exception as e:
+                        self.set_status(f"Excel conversion failed: {e}", "warning")
+
 
             # Custom extraction
             # Custom extraction
@@ -1216,6 +1264,16 @@ class AudioFeatureExtractorGUI:
                 )
                 
                 self.set_status("Custom extraction completed successfully", "success")
+
+                # NUOVO: Conversione Excel
+                if self.convert_to_excel.get():
+                    self.set_status("Converting custom CSV to Excel...", "progress")
+                    try:
+                        excel_path = convert_single_csv_to_excel(out_custom)
+                        if excel_path:
+                            self.set_status(f"Excel created: {os.path.basename(excel_path)}", "success")
+                    except Exception as e:
+                        self.set_status(f"Excel conversion failed: {e}", "warning")
 
             # Messaggio finale di successo
             self.set_status("All feature extraction completed successfully!", "success")

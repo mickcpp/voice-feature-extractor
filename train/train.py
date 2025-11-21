@@ -222,7 +222,9 @@ def main(
                 'ID',
                 'FileName',
                 'Tipo audio',
-            ]
+                'name',
+                'class'
+            ], errors='ignore'
         )
         y = merged_df[target_column]
     

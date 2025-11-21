@@ -21,6 +21,7 @@ UI/gui_config.json
 *.csv
 *_LLD.csv
 *.arff
+common/*
 
 # IDE
 .vscode/

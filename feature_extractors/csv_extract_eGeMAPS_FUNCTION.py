@@ -11,8 +11,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 # NUOVO: Carica i path dal JSON della GUI
 def load_paths_from_gui_config():
     """Carica i path dal file gui_config.json"""
-    config_file = os.path.join(os.path.dirname(__file__), '..', 'UI', 'gui_config.json')
-    
+    # Gestisci sia exe che Python normale
+    if getattr(sys, 'frozen', False):
+        # Exe: il config è nella home dell'utente
+        app_data_dir = os.path.join(os.path.expanduser('~'), '.voice_feature_extractor')
+        config_file = os.path.join(app_data_dir, 'gui_config.json')
+    else:
+        # Python: nella cartella UI
+        config_file = os.path.join(os.path.dirname(__file__), '..', 'UI', 'gui_config.json')
+
     if os.path.exists(config_file):
         try:
             with open(config_file, 'r', encoding='utf-8') as f:
